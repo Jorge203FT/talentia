@@ -26,27 +26,49 @@ const formularios = {
       {
         name: "ruc",
         type: "text",
-        placeholder: "RUC de la empresa"
+        placeholder: "RUC de la empresa",
+        minLength: 11,
+        maxLength: 11,
+        inputMode: "numeric",
+        pattern: "[0-9]{11}",
+        title: "El RUC debe tener exactamente 11 dígitos.",
+        onlyNumbers: true
       },
       {
         name: "empresa",
         type: "text",
-        placeholder: "Nombre de la empresa"
+        placeholder: "Nombre de la empresa",
+        minLength: 2,
+        maxLength: 120,
+        title: "Ingresa el nombre de la empresa."
       },
       {
         name: "contacto",
         type: "text",
-        placeholder: "Nombre de contacto"
+        placeholder: "Nombre de contacto",
+        minLength: 3,
+        maxLength: 80,
+        pattern: "[A-Za-zÁÉÍÓÚáéíóúÑñÜü\\s'-]{3,80}",
+        title: "Ingresa un nombre de contacto válido."
       },
       {
         name: "email",
         type: "email",
-        placeholder: "Correo corporativo"
+        placeholder: "Correo corporativo",
+        minLength: 6,
+        maxLength: 120,
+        title: "Ingresa un correo electrónico válido."
       },
       {
         name: "telefono",
         type: "text",
-        placeholder: "Teléfono"
+        placeholder: "Teléfono",
+        minLength: 9,
+        maxLength: 9,
+        inputMode: "numeric",
+        pattern: "[0-9]{9}",
+        title: "El teléfono debe tener exactamente 9 dígitos.",
+        onlyNumbers: true
       }
     ],
     selectPlaceholder: "¿En qué está interesado?",
@@ -74,22 +96,41 @@ const formularios = {
       {
         name: "nombre",
         type: "text",
-        placeholder: "Nombre completo"
+        placeholder: "Nombre completo",
+        minLength: 3,
+        maxLength: 80,
+        pattern: "[A-Za-zÁÉÍÓÚáéíóúÑñÜü\\s'-]{3,80}",
+        title: "Ingresa un nombre válido."
       },
       {
         name: "dni",
         type: "text",
-        placeholder: "DNI"
+        placeholder: "DNI",
+        minLength: 8,
+        maxLength: 8,
+        inputMode: "numeric",
+        pattern: "[0-9]{8}",
+        title: "El DNI debe tener exactamente 8 dígitos.",
+        onlyNumbers: true
       },
       {
         name: "email",
         type: "email",
-        placeholder: "Correo electrónico"
+        placeholder: "Correo electrónico",
+        minLength: 6,
+        maxLength: 120,
+        title: "Ingresa un correo electrónico válido."
       },
       {
         name: "telefono",
         type: "text",
-        placeholder: "Teléfono"
+        placeholder: "Teléfono",
+        minLength: 9,
+        maxLength: 9,
+        inputMode: "numeric",
+        pattern: "[0-9]{9}",
+        title: "El teléfono debe tener exactamente 9 dígitos.",
+        onlyNumbers: true
       }
     ],
     selectPlaceholder: "¿Qué te interesa?",
@@ -98,7 +139,7 @@ const formularios = {
       "Capacitaciones"
     ],
     buttonClass: "btn btn-dark",
-    buttonLabel: "Solicitar Cuenta"
+    buttonLabel: "Solicitar información"
   }
 };
 
@@ -109,6 +150,7 @@ function RegistroForm({tipo, cursoSeleccionado = null}) {
   const [interesSeleccionado, setInteresSeleccionado] = useState("");
   const [cursos, setCursos] = useState([]);
   const [enviando, setEnviando] = useState(false);
+  const [errores, setErrores] = useState({});
   const [modal, setModal] = useState({
     abierto: false,
     tipo: "",
@@ -157,11 +199,106 @@ function RegistroForm({tipo, cursoSeleccionado = null}) {
     });
   }
 
+  function validarCampo(field, valor) {
+    const valorLimpio = String(valor ?? "").trim();
+
+    if (!valorLimpio) {
+      return "Este campo es obligatorio.";
+    }
+
+    if (
+      field.minLength &&
+      valorLimpio.length < field.minLength
+    ) {
+      if (field.name === "ruc") {
+        return "El RUC debe tener exactamente 11 dígitos.";
+      }
+
+      if (field.name === "dni") {
+        return "El DNI debe tener exactamente 8 dígitos.";
+      }
+
+      if (field.name === "telefono") {
+        return "El teléfono debe tener exactamente 9 dígitos.";
+      }
+
+      return `Debe tener al menos ${field.minLength} caracteres.`;
+    }
+
+    if (
+      field.maxLength &&
+      valorLimpio.length > field.maxLength
+    ) {
+      return `No puede superar los ${field.maxLength} caracteres.`;
+    }
+
+    if (
+      field.onlyNumbers &&
+      !/^\d+$/.test(valorLimpio)
+    ) {
+      return "Este campo solo acepta números.";
+    }
+
+    if (
+      field.pattern &&
+      !(new RegExp(`^${field.pattern}$`)).test(valorLimpio)
+    ) {
+      return field.title || "El formato ingresado no es válido.";
+    }
+
+    if (field.type === "email") {
+      const correoValido =
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valorLimpio);
+
+      if (!correoValido) {
+        return "Ingresa un correo electrónico válido.";
+      }
+    }
+
+    return "";
+  }
+  
+  function validarInteres(valor) {
+    if (!valor) {
+      return "Selecciona una opción.";
+    }
+
+    return "";
+  }
 
   async function handleSubmit(event) {
     event.preventDefault();
 
     const form = event.currentTarget;
+    const nuevosErrores = {};
+
+    formulario.fields.forEach((field) => {
+      const valor = form.elements[field.name]?.value ?? "";
+
+      const error = validarCampo(field, valor);
+
+      if (error) {
+        nuevosErrores[field.name] = error;
+      }
+    });
+
+    const interes = form.elements.interes?.value ?? "";
+    const errorInteres = validarInteres(interes);
+
+    if (errorInteres) {
+      nuevosErrores.interes = errorInteres;
+    }
+
+    setErrores(nuevosErrores);
+
+    if (Object.keys(nuevosErrores).length > 0) {
+      const primerCampoConError =
+        Object.keys(nuevosErrores)[0];
+
+      form.elements[primerCampoConError]?.focus();
+
+      return;
+    }
 
     setEnviando(true);
 
@@ -248,61 +385,151 @@ function RegistroForm({tipo, cursoSeleccionado = null}) {
 
       <div className="form-content">
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} noValidate>
 
           {formulario.fields.map((field) => (
+            <div className="form-field" key={field.name}>
 
-            <input
-              key={field.name}
-              name={field.name}
-              type={field.type}
-              placeholder={field.placeholder}
-              required
-            />
+              <input
+                name={field.name}
+                type={field.type}
+                placeholder={field.placeholder}
+                required
+                minLength={field.minLength}
+                maxLength={field.maxLength}
+                inputMode={field.inputMode}
+                pattern={field.pattern}
+                title={field.title}
+                aria-invalid={Boolean(errores[field.name])}
+                aria-describedby={
+                  errores[field.name]
+                    ? `${field.name}-error`
+                    : undefined
+                }
+                className={
+                  errores[field.name]
+                    ? "input-error"
+                    : ""
+                }
+                onBlur={(event) => {
+                  const error = validarCampo(
+                    field,
+                    event.currentTarget.value
+                  );
 
+                  setErrores((actuales) => ({
+                    ...actuales,
+                    [field.name]: error
+                  }));
+                }}
+                onInput={(event) => {
+                  if (field.onlyNumbers) {
+                    event.currentTarget.value =
+                      event.currentTarget.value
+                        .replace(/\D/g, "")
+                        .slice(0, field.maxLength);
+                  }
+
+                  const error = validarCampo(
+                    field,
+                    event.currentTarget.value
+                  );
+
+                  setErrores((actuales) => ({
+                    ...actuales,
+                    [field.name]: error
+                  }));
+                }}
+              />
+
+              {errores[field.name] && (
+                <small
+                  id={`${field.name}-error`}
+                  className="form-field-error"
+                >
+                  {errores[field.name]}
+                </small>
+              )}
+
+            </div>
           ))}
 
 
-          <select
-            name="interes"
-            value={interesSeleccionado}
-            onChange={(event) =>
-              setInteresSeleccionado(
-                event.target.value
-              )
-            }
-            required
-          >
+          <div className="form-field">
 
-            <option value="" disabled>
-              {formulario.selectPlaceholder}
-            </option>
+            <select
+              name="interes"
+              value={interesSeleccionado}
+              required
+              aria-invalid={Boolean(errores.interes)}
+              aria-describedby={
+                errores.interes
+                  ? "interes-error"
+                  : undefined
+              }
+              className={
+                errores.interes
+                  ? "input-error"
+                  : ""
+              }
+              onChange={(event) => {
+                const valor = event.target.value;
 
-            {formulario.options.map((option) => (
+                setInteresSeleccionado(valor);
 
-              <option
-                key={option}
-                value={option}
-              >
-                {option}
+                setErrores((actuales) => ({
+                  ...actuales,
+                  interes: validarInteres(valor)
+                }));
+              }}
+              onBlur={(event) => {
+                const error = validarInteres(
+                  event.target.value
+                );
+
+                setErrores((actuales) => ({
+                  ...actuales,
+                  interes: error
+                }));
+              }}
+            >
+
+              <option value="" disabled>
+                {formulario.selectPlaceholder}
               </option>
 
-            ))}
-
-            {tipo === "alumno" &&
-              cursos.map((curso) => (
-
+              {formulario.options.map((option) => (
                 <option
-                  key={curso.id}
-                  value={curso.title}
+                  key={option}
+                  value={option}
                 >
-                  {curso.title}
+                  {option}
                 </option>
+              ))}
 
-              ))
-            }
+              {tipo === "alumno" &&
+                cursos.map((curso) => (
+                  <option
+                    key={curso.id}
+                    value={curso.title}
+                  >
+                    {curso.title}
+                  </option>
+                ))
+              }
 
-          </select>
+            </select>
+
+            {errores.interes && (
+              <small
+                id="interes-error"
+                className="form-field-error"
+              >
+                {errores.interes}
+              </small>
+            )}
+
+          </div>
 
 
           <button

@@ -10,7 +10,7 @@ import { renderFeaturedCourses } from "../../js/app.js";
 
 
 function Home() {
-    const { hash } = useLocation();
+    const location = useLocation();
     const navigate = useNavigate();
 
     const abrirCurso = (event) => {
@@ -27,15 +27,27 @@ function Home() {
     }, []);
 
     useEffect(() => {
-        if (hash) {
-            const element = document.querySelector(hash);
-            if (element) {
-                element.scrollIntoView({ behavior: "smooth" });
-            }
-        } else {
-            window.scrollTo({ top: 0, behavior: "smooth" });
+        const seccion = location.state?.scrollTo;
+
+        if (!seccion) {
+            return;
         }
-    }, [hash]);
+
+        const desplazarse = () => {
+            const elemento = document.getElementById(seccion);
+
+            if (elemento) {
+                elemento.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+            }
+        };
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(desplazarse);
+        });
+    }, [location.state]);
 
     return (
         <>
@@ -44,16 +56,27 @@ function Home() {
             <main>
                 <section class="hero" id="inicio">
                     <div class="container hero-content">
-                    <h1>Bienvenido a Talentia<br />Centro Formativo</h1>
+                        <h1>Bienvenido a Talentia<br />Centro Formativo</h1>
 
-                    <p>
-                        Centro especializado en capacitar profesionales para impulsar su desarrollo y aprendizaje en cada contexto laboral.
-                    </p>
+                        <p>
+                            Centro especializado en capacitar profesionales para impulsar su desarrollo y aprendizaje en cada contexto laboral.
+                        </p>
 
-                    <div class="header-actions">
-                        <a class="btn btn-primary">Comenzar ahora →</a>
-                        <a class="btn btn-secondary" href="#contacto">Solicitar Cotización →</a>
-                    </div>
+                        <div class="header-actions">
+                            <button type="button" className="btn btn-secondary" onClick={() => {
+                                const elemento = document.getElementById("contacto");
+
+                                if (elemento) {
+                                elemento.scrollIntoView({
+                                    behavior: "smooth",
+                                    block: "start"
+                                });
+                                }
+                            }}
+                            >
+                            Contáctanos →
+                            </button>
+                        </div>
                     </div>
                 </section>
 

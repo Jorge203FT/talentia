@@ -1,11 +1,40 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const closeMenu = () => {
     setMenuOpen(false);
+  };
+
+  const irASeccion = (seccion) => {
+    closeMenu();
+
+    // Si ya estamos en Home,
+    // desplazamos directamente sin modificar la URL.
+    if (location.pathname === "/") {
+      const elemento = document.getElementById(seccion);
+
+      if (elemento) {
+        elemento.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+      }
+
+      return;
+    }
+
+    // Si estamos en otra interfaz,
+    // regresamos al Home llevando la sección como estado.
+    navigate("/", {
+      state: {
+        scrollTo: seccion
+      }
+    });
   };
 
   return (
@@ -30,32 +59,78 @@ function Header() {
           className={`nav-links ${menuOpen ? "open" : ""}`}
           id="mobile-navigation"
         >
-          <Link to="/" onClick={closeMenu}>
+          <Link
+            to="/"
+            onClick={(event) => {
+              event.preventDefault();
+              irASeccion("inicio");
+            }}
+          >
             Inicio
           </Link>
 
-          <Link to="/#nosotros" onClick={closeMenu}>
+          <Link
+            to="/"
+            onClick={(event) => {
+              event.preventDefault();
+              irASeccion("nosotros");
+            }}
+          >
             Nosotros
           </Link>
 
-          <Link to="/#servicios" onClick={closeMenu}>
+          <Link
+            to="/"
+            onClick={(event) => {
+              event.preventDefault();
+              irASeccion("servicios");
+            }}
+          >
             Servicios
           </Link>
 
-          <Link to="/#cursos" onClick={closeMenu}>
+          <Link
+            to="/"
+            onClick={(event) => {
+              event.preventDefault();
+              irASeccion("cursos");
+            }}
+          >
             Cursos
           </Link>
 
-          <Link to="/#experiencia" onClick={closeMenu}>
+          <Link
+            to="/"
+            onClick={(event) => {
+              event.preventDefault();
+              irASeccion("experiencia");
+            }}
+          >
             Experiencia
           </Link>
 
-          <Link to="/#capacitaciones" onClick={closeMenu}>
+          <Link
+            to="/"
+            onClick={(event) => {
+              event.preventDefault();
+              irASeccion("capacitaciones");
+            }}
+          >
             Capacitaciones
           </Link>
 
-          <Link to="/#contacto" onClick={closeMenu}>
+          <Link
+            to="/"
+            onClick={(event) => {
+              event.preventDefault();
+              irASeccion("contacto");
+            }}
+          >
             Contacto
+          </Link>
+
+          <Link className="nav-cta" onClick={closeMenu}>
+            Acceso alumno →
           </Link>
         </nav>
 
