@@ -1,6 +1,5 @@
 
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../src/firebase.js";
+import { obtenerCursos } from "../src/cursoService.js";
 
 
 /* =========================================================
@@ -51,13 +50,7 @@ export async function renderFeaturedCourses() {
 
   try {
 
-    const snapshot = await getDocs(collection(db, "Cursos"));
-
-    const firebaseCourses =
-      snapshot.docs.map((documento) => ({
-        id: documento.id,
-        ...documento.data()
-      }));
+    const firebaseCourses = await obtenerCursos();
 
 
     container.innerHTML =
@@ -171,14 +164,7 @@ export async function renderCatalog() {
 
   try {
 
-    const snapshot =
-      await getDocs(collection(db, "Cursos"));
-
-    firebaseCourses =
-      snapshot.docs.map((documento) => ({
-        id: documento.id,
-        ...documento.data()
-      }));
+    firebaseCourses = await obtenerCursos();
 
   } catch (error) {
 

@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { doc, getDoc } from "firebase/firestore";
 import { motion } from "motion/react";
 
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import RegistroForm from "../components/RegistroForm";
-import { db } from "../firebase.js";
+import { consultarCurso, obtenerCursoEnCache } from "../cursoService.js";
 import { fadeUp } from "../animations/variants.js";
 
 
@@ -38,8 +37,8 @@ function DetalleCurso() {
 
   const { id } = useParams();
 
-  const [curso, setCurso] = useState(null);
-  const [cargando, setCargando] = useState(true);
+  const [curso, setCurso] = useState(() => obtenerCursoEnCache(id));
+  const [cargando, setCargando] = useState(() => !obtenerCursoEnCache(id));
   const [error, setError] = useState("");
 
 
@@ -48,67 +47,43 @@ function DetalleCurso() {
      ========================================================= */
 
   useEffect(() => {
+    let activo = true;
+    const cursoGuardado = id ? obtenerCursoEnCache(id) : null;
+    setCurso(cursoGuardado);
+    setCargando(!cursoGuardado);
+    setError("");
 
-    async function obtenerCurso() {
+    if (!id) {
+      setError("No se encontró el identificador del curso.");
+      setCargando(false);
+      return () => { activo = false; };
+    }
 
+    async function actualizarDetalle() {
       try {
+        const datosCurso = await consultarCurso(id);
+        if (!activo) return;
 
-        setCargando(true);
-        setError("");
-
-        const referenciaCurso =
-          doc(db, "Cursos", id);
-
-        const documentoCurso =
-          await getDoc(referenciaCurso);
-
-        if (!documentoCurso.exists()) {
-
+        if (!datosCurso) {
           setError("El curso no fue encontrado.");
           setCurso(null);
-
           return;
         }
 
-        const datosCurso = {
-          id: documentoCurso.id,
-          ...documentoCurso.data()
-        };
-
         setCurso(datosCurso);
-
-        console.log(
-          "Curso obtenido desde Firebase:",
-          datosCurso
-        );
-
       } catch (error) {
-
-        console.error(
-          "Error al obtener el curso:",
-          error
-        );
-
-        setError(
-          "No se pudo cargar la información del curso."
-        );
-
+        if (!activo) return;
+        console.error("Error al obtener el curso:", error);
+        if (!cursoGuardado) {
+          setError("No se pudo cargar la información del curso.");
+        }
       } finally {
-
-        setCargando(false);
-
+        if (activo) setCargando(false);
       }
-
     }
 
-
-    if (id) {
-      obtenerCurso();
-    } else {
-      setError("No se encontró el identificador del curso.");
-      setCargando(false);
-    }
-
+    actualizarDetalle();
+    return () => { activo = false; };
   }, [id]);
 
 

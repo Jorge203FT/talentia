@@ -2,7 +2,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import RegistroForm from "../components/RegistroForm";
 import { useEffect } from "react";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 import { motion } from "motion/react";
 import { fadeUp, staggerContainer, fadeUpItem, cardHover } from "../animations/variants.js";
 import AnimatedCounter from "../animations/AnimatedCounter";
@@ -11,6 +11,16 @@ import { renderFeaturedCourses } from "../../js/app.js";
 
 function Home() {
     const { hash } = useLocation();
+    const navigate = useNavigate();
+
+    const abrirCurso = (event) => {
+        const enlace = event.target.closest("a.course-action");
+        if (!enlace || event.defaultPrevented || event.button !== 0 ||
+            event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+        event.preventDefault();
+        navigate(enlace.getAttribute("href"));
+    };
 
     useEffect(() => {
         renderFeaturedCourses();
@@ -205,7 +215,7 @@ function Home() {
                         <p class="section-subtitle">Conoce programas diseñados para potenciar tu desarrollo profesional.</p>
                         </div>
 
-                        <a class="btn btn-dark featured-courses-btn" href="Cursos">Ver todos los cursos</a>
+                        <Link className="btn btn-dark featured-courses-btn" to="/cursos">Ver todos los cursos</Link>
                     </div>
                     <div className="featured-carousel" data-featured-carousel>
                         <button
@@ -218,7 +228,7 @@ function Home() {
                         </button>
 
                         <div className="featured-carousel-viewport" data-carousel-viewport>
-                            <div className="courses-grid featured-carousel-track" data-featured-courses></div>
+                            <div className="courses-grid featured-carousel-track" data-featured-courses onClick={abrirCurso}></div>
                         </div>
 
                         <button

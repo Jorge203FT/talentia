@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../firebase";
+import { obtenerCursos } from "../cursoService.js";
 
 
 import {
@@ -123,13 +122,7 @@ function RegistroForm({tipo, cursoSeleccionado = null}) {
     if (tipo !== "alumno") return;
     async function cargarCursos() {
       try {
-        const snapshot = await getDocs(collection(db, "Cursos"));
-        const datosCursos =
-          snapshot.docs.map((documento) => ({
-            id: documento.id,
-            ...documento.data()
-          }));
-
+        const datosCursos = await obtenerCursos();
         setCursos(datosCursos);
       } catch (error) {
         console.error(

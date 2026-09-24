@@ -11,7 +11,7 @@ import {
 function AnimatedCounter({ value, prefix = "", suffix = "", duration = 1.6 }) {
   const counterRef = useRef(null);
   const isInView = useInView(counterRef, {
-    once: true,
+    once: false,
     amount: 0.6
   });
 
@@ -24,7 +24,10 @@ function AnimatedCounter({ value, prefix = "", suffix = "", duration = 1.6 }) {
   });
 
   useEffect(() => {
-    if (!isInView) return;
+    if (!isInView) {
+  counter.set(0);
+  return;
+  }
 
     if (shouldReduceMotion) {
       counter.set(value);

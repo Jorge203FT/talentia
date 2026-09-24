@@ -1,12 +1,24 @@
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { renderCatalog } from "../../js/app.js";
 
 function Cursos() {
+  const navigate = useNavigate();
+
   useEffect(() => {
         renderCatalog();
   }, []);
+
+  const abrirCurso = (event) => {
+    const enlace = event.target.closest("a.course-action");
+    if (!enlace || event.defaultPrevented || event.button !== 0 ||
+        event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+    event.preventDefault();
+    navigate(enlace.getAttribute("href"));
+  };
 
   const clearFilters = () => {
     const search = document.querySelector("[data-search]");
@@ -50,7 +62,7 @@ function Cursos() {
 
           <div className="image-panel">
             <img
-              src="/assets/images/banner-cursos.png"
+              src="/assets/images/banner-cursos.webp"
               alt="Estudiante de Talentia"
               className="image-panel-img"
             />
@@ -132,6 +144,7 @@ function Cursos() {
           <div
             className="catalog-grid"
             data-catalog
+            onClick={abrirCurso}
           ></div>
 
           <div
