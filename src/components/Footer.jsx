@@ -121,7 +121,7 @@ function Footer() {
               role="img"
               aria-label="Perú"
             >
-              🇵🇪
+            <iconify-icon icon="circle-flags:pe"></iconify-icon>
             </span>{" "}
             +51 950 290 491
           </p>
